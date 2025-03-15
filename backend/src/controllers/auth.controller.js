@@ -1,6 +1,7 @@
+import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../lib/utils.js";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -9,11 +10,8 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Hash password to let them know they are authenticated.- Bcrypt
     if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "Password must be atleast 6 characters" });
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
     const user = await User.findOne({ email });
@@ -30,7 +28,7 @@ export const signup = async (req, res) => {
     });
 
     if (newUser) {
-      //generate jwt token here
+      // generate jwt token here
       generateToken(newUser._id, res);
       await newUser.save();
 
@@ -62,7 +60,9 @@ export const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
     generateToken(user._id, res);
+
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
@@ -94,7 +94,6 @@ export const updateProfile = async (req, res) => {
       return res.status(400).json({ message: "Profile pic is required" });
     }
 
-    // Cloudinary is just a bucket for our images. Stores images.
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
     const updatedUser = await User.findByIdAndUpdate(
       userId,

@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
-    // SenderID and ReceiverID will be a reference to User model.
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
